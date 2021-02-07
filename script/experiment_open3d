@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+import open3d as o3d
+import rosbag
+import rospy
+from sensor_msgs.msg import PointCloud2
+from o3d_tools.open3DToROS import convertCloudFromRosToOpen3d, convertCloudFromOpen3dToRos
+import numpy as np
+import time
+
+
+def benchmark_single(msg):
+    pc_start = convertCloudFromRosToOpen3d(msg)
+
+    tf = np.array([[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+    pc_transformed = pc_start.transform(tf)
+
+    box = o3d.geometry.AxisAlignedBoundingBox(min_bound=(-4, -4, -4), max_bound=(4, 4, 4))
+    pc_boxed = pc_transformed.crop(box)
+
+    pc_voxeled = pc_boxed.voxel_down_sample(0.005)
+
+    msg = convertCloudFromOpen3dToRos(pc_voxeled)
+
+
+def benchmark(bag_path, topic):
+    bag = rosbag.Bag(bag_path, 'r')
+
+    for topic, msg, t in bag.read_messages(topics=[topic]):
+        start = time.time()
+        benchmark_single(msg)
+        end = time.time()
+        print((end - start) * 1000)
+
+    bag.close()
+
+def main():
+    rospy.init_node('target_detect_node', anonymous=True)
+
+    # Params
+    bag_path = rospy.get_param('~bag_path')
+    topic = rospy.get_param('~topic')
+
+    benchmark(bag_path, topic)
+
+
+if __name__ == '__main__':
+    main()

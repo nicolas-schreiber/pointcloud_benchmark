@@ -1,0 +1,8 @@
+<launch>
+
+    <node name="pointcloud_benchmark_pcl" pkg="pointcloud_benchmark" type="experiment_open3d" required="true" output="screen">
+        <param name="bag_path" value="/media/nutzio/ML/2021-01-21-16-05-15.bag"/>
+        <param name="topic" value="/cam_2/points2"/>
+    </node>
+
+</launch>
