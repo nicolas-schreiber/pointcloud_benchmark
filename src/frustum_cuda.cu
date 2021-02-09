@@ -45,8 +45,8 @@ struct FrustumCulling {
         Eigen::Vector3f fp_bl (fp_c - (up * fp_h / 2) - (right * fp_w / 2));  // Bottom left corner of the far plane
         Eigen::Vector3f fp_br (fp_c - (up * fp_h / 2) + (right * fp_w / 2));  // Bottom right corner of the far plane
        
-        Eigen::Vector3f np_c (T + view * np_dist);                           // near plane center
-        //Eigen::Vector3f np_tl = np_c + (up * np_h/2) - (right * np_w/2);    // Top left corner of the near plane
+        Eigen::Vector3f np_c (T + view * np_dist);                            // near plane center
+        Eigen::Vector3f np_tl (np_c + (up * np_h/2) - (right * np_w/2));      // Top left corner of the near plane
         Eigen::Vector3f np_tr (np_c + (up * np_h / 2) + (right * np_w / 2));  // Top right corner of the near plane
         Eigen::Vector3f np_bl (np_c - (up * np_h / 2) - (right * np_w / 2));  // Bottom left corner of the near plane
         Eigen::Vector3f np_br (np_c - (up * np_h / 2) + (right * np_w / 2));  // Bottom right corner of the near plane
