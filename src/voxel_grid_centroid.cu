@@ -1,7 +1,7 @@
 #include <cassert>
 #include <iostream>
 
-#include "pointcloud_cuda.cuh"
+#include "voxel_grid.cuh"
 #include <stdio.h>
 #include <stdlib.h>
 #include <cuda.h>
@@ -110,7 +110,7 @@ uint32_t voxel_grid(
     thrust::sort_by_key(voxel_idxs.begin(), voxel_idxs.end(), point_idxs.begin());
     thrust::copy(thrust::make_permutation_iterator(d_voxel_cloud.begin(), point_idxs.begin()), thrust::make_permutation_iterator(d_voxel_cloud.begin(), point_idxs.end()), d_voxel_cloud_sorted.begin());
 
-    // thrust::sort_by_key(voxel_idxs.begin(), voxel_idxs.end(), d_voxel_cloud.begin());
+    thrust::sort_by_key(voxel_idxs.begin(), voxel_idxs.end(), d_voxel_cloud.begin());
 
     // Step 3: Count Amount of Voxels
     // number of histogram bins is equal to number of unique values (assumes data.size() > 0)

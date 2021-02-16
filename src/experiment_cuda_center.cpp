@@ -19,7 +19,7 @@
 #define foreach BOOST_FOREACH
 
 
-void benchmark_one(sensor_msgs::PointCloud2::ConstPtr cloud) {
+void benchmark_one(sensor_msgs::PointCloud2::ConstPtr cloud, ros::Publisher& pc_pub) {
     sensor_msgs::PointCloud2Ptr point_cloud(new sensor_msgs::PointCloud2);
 
     const size_t point_count = cloud->height * cloud->width;
@@ -38,11 +38,18 @@ void benchmark_one(sensor_msgs::PointCloud2::ConstPtr cloud) {
         pcd_modifier.resize(point_count);    
     }
 
-    uint32_t voxelized_num = transformCropAndVoxelize(cloud, (float*) point_cloud->data.data());
+    uint32_t voxelized_num = transformCropAndVoxelizeCenter(cloud, (float*) point_cloud->data.data());
     pcd_modifier.resize(voxelized_num);
+
+    
+    pc_pub.publish(point_cloud);
+
 }
 
 void benchmark(std::string bag_path, std::string topic) {
+    ros::NodeHandle n;
+    ros::Publisher pc_pub = n.advertise<sensor_msgs::PointCloud2>("pc", 5);
+
     rosbag::Bag bag;
     bag.open(bag_path, rosbag::bagmode::Read);
 
@@ -51,13 +58,14 @@ void benchmark(std::string bag_path, std::string topic) {
 
     rosbag::View view(bag, rosbag::TopicQuery(topics));
     
+    // for(int i = 0; i < 1000; i++)
     foreach(rosbag::MessageInstance const m, view) {
         sensor_msgs::PointCloud2::ConstPtr s = m.instantiate<sensor_msgs::PointCloud2>();
         if (s == NULL) continue;
 
         ros::WallTime start_, end_;
         start_ = ros::WallTime::now();
-        benchmark_one(s);
+        benchmark_one(s, pc_pub);
         end_ = ros::WallTime::now();
         double execution_time = (end_ - start_).toNSec() * 1e-6;
 

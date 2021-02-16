@@ -22,7 +22,8 @@ find_package(PCL 1.7.1 REQUIRED)
 set(CUDA_NVCC_FLAGS "-arch=compute_30" CACHE STRING "nvcc flags" FORCE)
 set (CUDA_VERBOSE_BUILD ON CACHE BOOL "nvcc verbose" FORCE)
 set(LIB_TYPE STATIC) 
-cuda_add_library(PointCloudCuda ${LIB_TYPE} src/pointcloud_cuda.cu)
+cuda_add_library(VoxelGrid ${LIB_TYPE} src/voxel_grid.cu)
+cuda_add_library(VoxelGridCentroid ${LIB_TYPE} src/voxel_grid_centroid.cu)
 cuda_add_library(FrustumCuda ${LIB_TYPE} src/frustum_cuda.cu)
 
 
@@ -46,14 +47,24 @@ add_dependencies(experiment_pcl ${catkin_EXPORTED_TARGETS})
 
 
 # CUDA Experiment
-
 add_executable(experiment_cuda src/experiment_cuda.cpp)
-add_dependencies(experiment_cuda PointCloudCuda)
+add_dependencies(experiment_cuda VoxelGridCentroid)
 
 target_link_libraries(experiment_cuda 
   ${catkin_LIBRARIES} 
   ${PCL_LIBRARIES}
-  PointCloudCuda
+  VoxelGridCentroid
+)
+
+
+# CUDA Experiment
+add_executable(experiment_cuda_center src/experiment_cuda_center.cpp)
+add_dependencies(experiment_cuda_center VoxelGrid)
+
+target_link_libraries(experiment_cuda_center 
+  ${catkin_LIBRARIES} 
+  ${PCL_LIBRARIES}
+  VoxelGrid
 )
 
 # Frustum Experiment

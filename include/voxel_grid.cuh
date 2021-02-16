@@ -21,6 +21,31 @@ struct __attribute__((__packed__)) i16Point {
     int16_t z;
 };
 
+struct __attribute__((__packed__)) ui64RGB {
+    uint64_t r = 0;
+    uint64_t g = 0;
+    uint64_t b = 0;
+
+    // Empty
+    __host__ __device__
+    inline ui64RGB() {};
+
+        // From Values
+    __host__ __device__
+    inline ui64RGB(uint64_t _r, uint64_t _g, uint64_t _b) 
+        : r(_r), g(_g), b(_b){};
+    
+    __host__ __device__
+    inline ui64RGB operator+(ui64RGB v) const {
+        return ui64RGB(r + v.r, g + v.g, b + v.b);
+    }
+
+    __host__ __device__
+    inline ui64RGB operator*(ui64RGB v) const {
+        return ui64RGB(r * v.r, g * v.g, b * v.b);
+    }
+};
+
 struct __attribute__((__packed__)) ui8RGBA {
     uint8_t r;
     uint8_t g;
@@ -41,6 +66,24 @@ struct __attribute__((__packed__)) fXYZ {
         : x(x_), y(y_), z(z_) {};
 };
 
+struct __attribute__((__packed__)) ui32XYZ {
+    uint32_t x;
+    uint32_t y;
+    uint32_t z;
+
+    __host__ __device__
+    inline ui32XYZ(){};
+
+    __host__ __device__
+    inline ui32XYZ(uint32_t x_, uint32_t y_, uint32_t z_) 
+        : x(x_), y(y_), z(z_) {};
+
+    __host__ __device__
+    inline ui32XYZ(const ui32XYZ& other) 
+        : x(other.x), y(other.y), z(other.z) {};
+
+};
+
 struct __attribute__((__packed__)) sXYZ {
     size_t x;
     size_t y;
@@ -52,12 +95,17 @@ struct __attribute__((__packed__)) sXYZ {
     __host__ __device__
     inline sXYZ(size_t x_, size_t y_, size_t z_) 
         : x(x_), y(y_), z(z_) {};
+
+    __host__ __device__
+    inline sXYZ(const sXYZ& other) 
+        : x(other.x), y(other.y), z(other.z) {};
+
 };
 
-
 uint32_t transformCropAndVoxelize(sensor_msgs::PointCloud2::ConstPtr msg, float* point_cloud_out);
+uint32_t transformCropAndVoxelizeCenter(sensor_msgs::PointCloud2::ConstPtr msg, float* point_cloud_out);
 
-struct Point {
+struct __attribute__((__packed__)) Point {
     float x;
     float y;
     float z;
