@@ -51,9 +51,7 @@ struct IdxColorWeightToPoint {
     ui32XYZ voxel_nums;
     fXYZ voxel_lengths;
     fXYZ min_xyz;
-    IdxColorWeightToPoint(ui32XYZ _voxel_nums, fXYZ _voxel_lengths, fXYZ _min_xyz) : voxel_nums(_voxel_nums), voxel_lengths(_voxel_lengths), min_xyz(_min_xyz) {
-        printf("%f %f %f %f %f %f\n", voxel_lengths.x, voxel_lengths.y, voxel_lengths.z, min_xyz.x, min_xyz.y, min_xyz.z);
-    };
+    IdxColorWeightToPoint(ui32XYZ _voxel_nums, fXYZ _voxel_lengths, fXYZ _min_xyz) : voxel_nums(_voxel_nums), voxel_lengths(_voxel_lengths), min_xyz(_min_xyz) {};
 
 
     __host__ __device__
@@ -62,22 +60,16 @@ struct IdxColorWeightToPoint {
         ui64RGB color = thrust::get<1>(t);
         uint32_t weight = thrust::get<2>(t);
 
-        if(weight < 3) return Point(0, 0, 0, 0);
+        // if(weight < 3) return Point(0, 0, 0, 0);
         
         uint32_t idx_z = idx / (voxel_nums.x * voxel_nums.y);
         uint32_t idx_y = (idx - (idx_z * voxel_nums.x * voxel_nums.y)) / voxel_nums.x;
         uint32_t idx_x = idx % voxel_nums.x;
 
-        // if(idx_x == idx_y) printf("Damnnit %d\n", idx);
-        if(idx - (idx_x + idx_y * voxel_nums.x + idx_z * voxel_nums.x * voxel_nums.y))
-            printf("AAAAAAAAA %d %d\n", idx, idx_x + idx_y * voxel_nums.x + idx_z * voxel_nums.x * voxel_nums.y);
-
-
         Point p;
         p.x = ((float) idx_x) * voxel_lengths.x + min_xyz.x;
         p.y = ((float) idx_y) * voxel_lengths.y + min_xyz.y;
         p.z = ((float) idx_z) * voxel_lengths.z + min_xyz.z;
-        // printf("%f %f %f\n", p.x, p.y, p.z);
 
         uint8_t* rgb = (uint8_t*) &p.rgb;
         rgb[0] = (uint8_t) round(sqrt((float) (color.r / weight)));
@@ -118,7 +110,7 @@ struct TFAndCropPoint {
 };
 
 
-uint32_t voxel_grid(thrust::device_vector<Point>& d_points, float* out, ui32XYZ voxel_nums, fXYZ voxel_lengths, fXYZ min_xyz) {
+uint32_t voxel_grid(thrust::device_vector<Point>& d_points, float* out, const ui32XYZ& voxel_nums, const fXYZ& voxel_lengths, const fXYZ& min_xyz) {
     uint32_t num = d_points.size();
 
     // Step 1: Produce Indizes and Colors
@@ -129,18 +121,10 @@ uint32_t voxel_grid(thrust::device_vector<Point>& d_points, float* out, ui32XYZ 
 
     // Step 2: Sort by Idxs
     thrust::device_vector<uint32_t> d_point_idxs(num);
-    thrust::device_vector<ui64RGB> d_colors_sorted(num);
     thrust::sequence(d_point_idxs.begin(), d_point_idxs.end());
     thrust::sort_by_key(d_voxel_idxs.begin(), d_voxel_idxs.end(), d_point_idxs.begin());
-    // thrust::copy(thrust::make_permutation_iterator(d_colors.begin(), point_idxs.begin()), thrust::make_permutation_iterator(d_colors.begin(), point_idxs.end()), d_colors_sorted.begin());
 
-    // Step 2: Sort by Idxs
-    // thrust::sort_by_key(d_voxel_idxs.begin(), d_voxel_idxs.end(), d_colors.begin()); // This sorts the keys (d_voxel_idxs) as well
-
-    
-    // Step 3: Count Amount of Voxels
-    // number of histogram bins is equal to number of unique values (assumes data.size() > 0)
-    // uint32_t num_voxels = thrust::inner_product(d_voxel_idxs.begin(), d_voxel_idxs.end() - 1, d_voxel_idxs.begin() + 1, 1, thrust::plus<uint32_t>(), thrust::not_equal_to<uint32_t>());
+    // Step 3: Was here once...
 
     // Step 4: Produce "Histogram" for weights
     thrust::device_vector<uint32_t> d_weights(num);
@@ -175,7 +159,7 @@ uint32_t transformCropAndVoxelizeCenter(sensor_msgs::PointCloud2::ConstPtr msg, 
     size_t num_points = msg->height * msg->width;
     fXYZ min_xyz(-2, -2, -2);
     fXYZ max_xyz(2, 2, 2);
-    fXYZ voxel_lengths(0.005, 0.005, 0.005);
+    fXYZ voxel_lengths(0.0025, 0.0025, 0.0025);
     ui32XYZ voxel_nums(0, 0, 0);
 
     voxel_nums.x = ceil((max_xyz.x - min_xyz.x) / voxel_lengths.x);
