@@ -25,6 +25,7 @@ set(LIB_TYPE STATIC)
 cuda_add_library(VoxelGrid ${LIB_TYPE} src/voxel_grid.cu)
 cuda_add_library(VoxelGridCentroid ${LIB_TYPE} src/voxel_grid_centroid.cu)
 cuda_add_library(FrustumCuda ${LIB_TYPE} src/frustum_cuda.cu)
+# cuda_add_library(FlannCuda ${LIB_TYPE} src/flann_cuda.cu)
 
 
 ###################################
@@ -66,6 +67,27 @@ target_link_libraries(experiment_cuda_center
   ${PCL_LIBRARIES}
   VoxelGrid
 )
+
+# CUDA Experiment LZ4
+add_executable(experiment_cuda_lz4 src/experiment_cuda_lz4.cpp)
+add_dependencies(experiment_cuda_lz4 VoxelGridCentroid)
+
+target_link_libraries(experiment_cuda_lz4 
+  ${catkin_LIBRARIES} 
+  ${PCL_LIBRARIES}
+  VoxelGridCentroid
+)
+
+
+# FLANN Experiment
+# add_executable(experiment_cuda_flann src/experiment_cuda_flann.cpp)
+# add_dependencies(experiment_cuda_flann VoxelGrid)
+
+# target_link_libraries(experiment_cuda_flann 
+#   ${catkin_LIBRARIES} 
+#   ${PCL_LIBRARIES}
+#   FlannCuda
+# )
 
 # Frustum Experiment
 

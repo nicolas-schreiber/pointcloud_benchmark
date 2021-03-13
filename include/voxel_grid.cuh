@@ -53,6 +53,12 @@ struct __attribute__((__packed__)) ui8RGBA {
     uint8_t a;
 };
 
+struct __attribute__((__packed__)) ui8RGB {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+};
+
 struct __attribute__((__packed__)) fXYZ {
     float x;
     float y;
@@ -143,9 +149,9 @@ struct Voxel {
         z = p.z; 
         
         uint8_t* rgb = (uint8_t*) &p.rgb;
-        r = (float) pow(rgb[0], 2);
-        g = (float) pow(rgb[1], 2);
-        b = (float) pow(rgb[2], 2);
+        r = powf(rgb[0], 2);
+        g = powf(rgb[1], 2);
+        b = powf(rgb[2], 2);
     };
 
     // From Values
